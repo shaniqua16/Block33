@@ -78,12 +78,13 @@ app.put("/api/employees/:id", async(req, res, next)=>{
         const {name, department} = req.body;
         const SQL= `
         UPDATE employees
-            SET name = $1, 
-            department_id= (SELECT id FROM departments WHERE name = $2), 
-            updated_at = CURRENT_TIMESTAMP
-            where id = $3
+            (SET name = $1, 
+            department_id= (SELECT id FROM departments WHERE name = $2)) 
+            updated_at = (CURRENT_TIMESTAMP WHERE id = $3)
             RETURNING *
             `;
+           const response= await client.query(SQL, [name, department,id]);
+    res.sendStatus(200).json(response.rows[0]);
     } catch (error) {
         next(error);
     }
